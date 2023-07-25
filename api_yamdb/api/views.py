@@ -4,6 +4,11 @@ from rest_framework.filters import SearchFilter
 from django.db.models import Avg
 
 from reviews.models import Category, Genre, Title
+from .serializers import (CategorySerializer,
+                          GenreSerializer,
+                          TitleSerializer,
+                          TitleCRUDSerializer)
+
 
 class CreateListDeleteViewSet(viewsets.GenericViewSet,
                               mixins.ListModelMixin,
@@ -40,7 +45,8 @@ class TitleViewSet(viewsets.ModelViewSet):
     """Title viewset"""
     # add permissions
     serializer_class = TitleSerializer
-    queryset = Title.objects.all().annotate(rating=Avg('reviews__score'))
+    # uncomment once reviews model is available
+    # queryset = Title.objects.all().annotate(rating=Avg('reviews__score'))
     filter_backends = (
         SearchFilter,
     )
@@ -52,4 +58,3 @@ class TitleViewSet(viewsets.ModelViewSet):
         elif self.action == "destroy":
             return HttpResponse("", status=204)
         return TitleSerializer
-
