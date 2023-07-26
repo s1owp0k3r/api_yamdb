@@ -10,10 +10,13 @@ class Title(models.Model):
 
 
 class Review(models.Model):
+    """Review model."""
     text = models.TextField()
-    # author = models.ForeignKey(
-    #     User, on_delete=models.CASCADE, related_name='reviews'
-    # )
+    # Раскомментировать после реализации модели пользователя:
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='reviews',
+        default=1
+    )
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE, related_name='reviews'
     )
@@ -22,4 +25,28 @@ class Review(models.Model):
     )
     pub_date = models.DateTimeField(
         'Дата публикации', auto_now_add=True
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'title'],
+                name='unique_author_title'
+            )
+        ]
+
+
+class Comment(models.Model):
+    """Comment to review model."""
+    # Раскомментировать после реализации модели пользователя:
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='comments',
+        default=1
+    )
+    review = models.ForeignKey(
+        Review, on_delete=models.CASCADE, related_name='comments'
+    )
+    text = models.TextField()
+    pub_date = models.DateTimeField(
+        'Дата публикации', auto_now_add=True, db_index=True
     )
