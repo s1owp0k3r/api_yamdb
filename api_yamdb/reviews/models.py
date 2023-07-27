@@ -4,7 +4,7 @@ from django.db import models
 
 User = get_user_model()
 
-
+# Удалить после реализации модели Title:
 class Title(models.Model):
     name = models.CharField(max_length=200)
 
@@ -12,10 +12,8 @@ class Title(models.Model):
 class Review(models.Model):
     """Review model."""
     text = models.TextField()
-    # Раскомментировать после реализации модели пользователя:
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='reviews',
-        default=1
+        User, on_delete=models.CASCADE, related_name='reviews'
     )
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE, related_name='reviews'
@@ -38,7 +36,6 @@ class Review(models.Model):
 
 class Comment(models.Model):
     """Comment to review model."""
-    # Раскомментировать после реализации модели пользователя:
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='comments',
         default=1
@@ -48,5 +45,5 @@ class Comment(models.Model):
     )
     text = models.TextField()
     pub_date = models.DateTimeField(
-        'Дата публикации', auto_now_add=True, db_index=True
+        'Дата публикации', auto_now_add=True
     )
