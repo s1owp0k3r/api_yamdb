@@ -7,25 +7,14 @@ from reviews.models import Title, Comment, Review
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True,
-        slug_field='username'
-    )
-
-    class Meta:
-        model = Review
-        fields = ('id', 'text', 'author', 'score', 'pub_date')
-        read_only_fields = ('id', 'pub_date')
-
-
-class ReviewCRUDSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(
-        read_only=True,
         slug_field='username',
         default=serializers.CurrentUserDefault()
     )
     title = serializers.PrimaryKeyRelatedField(
-        read_only=True,
-        default=1
+        queryset=Title.objects.all(),
+        default=Title.objects.first()
     )
+
 
     class Meta:
         model = Review

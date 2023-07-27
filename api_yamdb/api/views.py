@@ -2,11 +2,12 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 
 from reviews.models import Title, Review
-from .serializers import ReviewSerializer, ReviewCRUDSerializer, CommentSerializer
+from .serializers import ReviewSerializer, CommentSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
 
+    serializer_class = ReviewSerializer
     permission_classes = [] # нужно добавить пермишн
 
     def get_queryset(self):
@@ -19,11 +20,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
         title_id = self.kwargs.get('title_id')
         review_title = get_object_or_404(Title, id=title_id)
         serializer.save(title=review_title) # добавить author=self.request.user, когда будут реализована аутентификация
-
-    def get_serializer_class(self):
-        if self.action in ('create', 'update', 'partial_update', 'destroy'):
-            return ReviewCRUDSerializer
-        return ReviewSerializer
 
 
 class CommentViewSet(viewsets.ModelViewSet):
