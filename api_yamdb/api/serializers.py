@@ -28,8 +28,8 @@ class TitleSerializer(serializers.ModelSerializer):
         if not self.context.get("request") == "POST":
             return data
 
-        title_name = self.context.get('view').kwargs.get("name")
-        title_year = self.context.get('view').kwargs.get("year")
+        title_name = self.context.get("view").kwargs.get("name")
+        title_year = self.context.get("view").kwargs.get("year")
 
         if Title.objects.filter(name=title_name, year=title_year).exists():
             raise serializers.ValidationError(
