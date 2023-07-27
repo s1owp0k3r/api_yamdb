@@ -8,6 +8,7 @@ from .serializers import (CategorySerializer,
                           GenreSerializer,
                           TitleReadSerializer,
                           TitleCRUDSerializer)
+from .permissions import IsAdminOrReadOnly
 
 
 class CreateListDeleteViewSet(viewsets.GenericViewSet,
@@ -25,21 +26,21 @@ class CreateListDeleteViewSet(viewsets.GenericViewSet,
 
 class CategoryViewSet(CreateListDeleteViewSet):
     """Categories viewset"""
-    # add permissions
+    permission_classes = (IsAdminOrReadOnly,)
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
 
 
 class GenreViewSet(CreateListDeleteViewSet):
     """Genre viewset"""
-    # add permissions
+    permission_classes = (IsAdminOrReadOnly,)
     serializer_class = GenreSerializer
     queryset = Genre.objects.all()
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     """Title viewset"""
-    # add permissions
+    permission_classes = (IsAdminOrReadOnly,)
     # uncomment once reviews model is available
     # queryset = Title.objects.all().annotate(rating=Avg('reviews__score'))
     filter_backends = (
