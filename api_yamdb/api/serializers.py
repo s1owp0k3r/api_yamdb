@@ -28,7 +28,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         # добавить в filter условие author=self.context['request'].user
         # после реализации модели юзера
         if (
-            Review.objects.filter(title=title)
+            Review.objects.filter(title=title).exists()
             and self.context['request'].method == 'POST'
         ):
             raise serializers.ValidationError(
