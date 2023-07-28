@@ -1,7 +1,71 @@
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import serializers
 
-from reviews.models import Title, Comment, Review
+from reviews.models import (
+    Category, Genre, Title, Comment, Review
+)
+
+
+class CategorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Category
+        fields = "__all__"
+
+
+class GenreSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Genre
+        fields = "__all__"
+
+
+class TitleSerializer(serializers.ModelSerializer):
+    """Generic serializer for Title"""
+    rating = serializers.IntegerField(read_only=True, required=False)
+
+    def validate_year(self, value):
+        """Validate if year is higher than the current year"""
+        current_year = timezone.now().year
+        if value > current_year:
+            raise serializers.ValidationError(
+                "Year validation error."
+                f"Specified '{value}' year must be "
+                f"less or equal current '{current_year}' year.",
+            )
+        return value
+
+    class Meta:
+        model = Title
+        fields = (
+            "id",
+            "name",
+            "year",
+            "rating",
+            "description",
+            "genre",
+            "category",
+        )
+
+
+class TitleReadSerializer(TitleSerializer):
+
+    genre = GenreSerializer(many=True, read_only=True)
+    category = CategorySerializer(read_only=True)
+
+
+class TitleCRUDSerializer(TitleSerializer):
+    genre = serializers.SlugRelatedField(
+        slug_field="slug",
+        queryset=Genre.objects.all(),
+        many=True
+    )
+    category = serializers.SlugRelatedField(
+        slug_field="slug",
+        queryset=Category.objects.all()
+    )
+    description = serializers.CharField(required=False)
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -23,7 +87,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'pub_date')
 
     def validate(self, data):
-        """Проверка количества отзывов на произведение у пользователя."""
+        """Reviews of current user count checking."""
         title = get_object_or_404(Title, id=self.context['title_id'])
         # добавить в filter условие author=self.context['request'].user
         # после реализации модели юзера
@@ -32,7 +96,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             and self.context['request'].method == 'POST'
         ):
             raise serializers.ValidationError(
-                'Нельзя оставить несколько отзывов на одно произведение!')
+                'You have already post a review for this title!')
         return data
 
 
