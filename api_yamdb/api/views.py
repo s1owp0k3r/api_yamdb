@@ -1,15 +1,68 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets
+from rest_framework import viewsets, mixins
+from rest_framework.filters import SearchFilter
+from rest_framework.permissions import SAFE_METHODS
+from django.db.models import Avg
 
-from reviews.models import Title, Review
-from .serializers import ReviewSerializer, CommentSerializer
+from reviews.models import Category, Genre, Title, Review
+from .serializers import (
+    CategorySerializer,
+    GenreSerializer,
+    TitleReadSerializer,
+    TitleCRUDSerializer,
+    ReviewSerializer,
+    CommentSerializer
+)
 
 # Убрать эти строчки, когда будут реализована аутентификация:
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
+class CreateListDeleteViewSet(viewsets.GenericViewSet,
+                              mixins.ListModelMixin,
+                              mixins.CreateModelMixin,
+                              mixins.DestroyModelMixin):
+    """Generic class for list, create, delete actions"""
+
+    filter_backends = (
+        SearchFilter,
+    )
+    search_fields = ("name",)
+    lookup_field = "slug"
+
+
+class CategoryViewSet(CreateListDeleteViewSet):
+    """Categories viewset"""
+    # add permissions
+    serializer_class = CategorySerializer
+    queryset = Category.objects.all()
+
+
+class GenreViewSet(CreateListDeleteViewSet):
+    """Genre viewset"""
+    # add permissions
+    serializer_class = GenreSerializer
+    queryset = Genre.objects.all()
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    """Title viewset"""
+    # add permissions
+    queryset = Title.objects.all().annotate(rating=Avg('reviews__score'))
+    filter_backends = (
+        SearchFilter,
+    )
+    search_fields = ("category__slug", "genre__slug", "name", "year", )
+
+    def get_serializer_class(self):
+        if self.action in SAFE_METHODS:
+            return TitleReadSerializer
+        return TitleCRUDSerializer
+
+
 class ReviewViewSet(viewsets.ModelViewSet):
+    """Review viewset"""
 
     serializer_class = ReviewSerializer
     permission_classes = [] # нужно добавить пермишн
@@ -32,6 +85,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
+    """Comment viewset"""
 
     serializer_class = CommentSerializer
     permission_classes = [] # нужно добавить пермишн
