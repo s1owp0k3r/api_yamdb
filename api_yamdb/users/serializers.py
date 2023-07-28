@@ -7,4 +7,4 @@ class UserSerializer(serializers.ModelSerializer):
     """Generic serializer for User."""
     class Meta:
         model = User
-        fields = "__all__"
+        fields = '__all__'
