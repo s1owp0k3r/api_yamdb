@@ -87,7 +87,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'pub_date')
 
     def validate(self, data):
-        """Проверка количества отзывов на произведение у пользователя."""
+        """Reviews of current user count checking."""
         title = get_object_or_404(Title, id=self.context['title_id'])
         # добавить в filter условие author=self.context['request'].user
         # после реализации модели юзера
@@ -96,7 +96,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             and self.context['request'].method == 'POST'
         ):
             raise serializers.ValidationError(
-                'Нельзя оставить несколько отзывов на одно произведение!')
+                'You have already post a review for this title!')
         return data
 
 
