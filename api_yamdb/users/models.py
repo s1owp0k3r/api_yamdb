@@ -8,28 +8,28 @@ class User(AbstractUser):
     MODERATOR = "moderator"
     USER = "user"
     ROLE = [
-        (ADMIN, "Администратор"),
-        (MODERATOR, "Модератор"),
-        (USER, "Пользователь"),
+        (ADMIN, "Administrator"),
+        (MODERATOR, "Moderator"),
+        (USER, "User"),
     ]
 
     username = models.CharField(
-        max_length=150, unique=True, verbose_name="Имя пользователя"
+        max_length=150, unique=True, verbose_name="Username"
     )
     email = models.EmailField(
-        max_length=254, unique=True, verbose_name="Электронная почта"
+        max_length=254, unique=True, verbose_name="Email"
     )
     first_name = models.CharField(
-        max_length=150, blank=True, verbose_name="Имя"
+        max_length=150, blank=True, verbose_name="First name"
     )
     last_name = models.CharField(
-        max_length=150, blank=True, verbose_name="Фамилия"
+        max_length=150, blank=True, verbose_name="Last name"
     )
     bio = models.CharField(
-        max_length=100, blank=True, verbose_name="Биография"
+        max_length=100, blank=True, verbose_name="Biography"
     )
     role = models.CharField(
-        max_length=100, choices=ROLE, default=USER, verbose_name="Роль"
+        max_length=20, choices=ROLE, default=USER, verbose_name="Role"
     )
 
     def __str__(self):
