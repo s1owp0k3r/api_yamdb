@@ -1,6 +1,6 @@
 from rest_framework import viewsets, views, response, status
 from rest_framework.filters import SearchFilter
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from django.core import exceptions
@@ -14,11 +14,11 @@ from .permissions import IsAdmin
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    """Create user."""
+    """User viewset."""
     queryset = User.objects.all()
     serializer_class = UserSerializer
     lookup_field = "username"
-    permission_classes = (IsAdmin, IsAuthenticated)
+    permission_classes = (IsAdmin,)
     filter_backends = (SearchFilter,)
     search_fields = ("username",)
 
@@ -40,7 +40,7 @@ class SignUpViewSet(views.APIView):
         confirmation_code = default_token_generator.make_token(user)
         message = EmailMessage(
             body=f"Сonfirmation code for {user.username}: {confirmation_code}",
-            to=(request.data["email"],),
+            to=request.data,
         )
         message.send(fail_silently=True)
         response_text = {
@@ -62,7 +62,7 @@ class TokenViewSet(views.APIView):
             confirmation_code = serializer.validated_data["confirmation_code"]
             if default_token_generator.check_token(user, confirmation_code):
                 token = RefreshToken.for_user(user)
-                return response.Response({"Токен": str(token.access_token)})
+                return response.Response({"Token": str(token.access_token)})
             return response.Response(
                 {"Error": "Invalid access code."},
                 status=status.HTTP_400_BAD_REQUEST
