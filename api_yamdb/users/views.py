@@ -40,14 +40,10 @@ class SignUpViewSet(views.APIView):
         confirmation_code = default_token_generator.make_token(user)
         message = EmailMessage(
             body=f"Сonfirmation code for {user.username}: {confirmation_code}",
-            to=request.data,
+            to=(request.data["email"],),
         )
         message.send(fail_silently=True)
-        response_text = {
-            "Username": user.username,
-            "Email": user.email
-        }
-        return response.Response(response_text, status=status.HTTP_200_OK)
+        return response.Response(request.data, status=status.HTTP_200_OK)
 
 
 class TokenViewSet(views.APIView):
