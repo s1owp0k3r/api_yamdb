@@ -1,3 +1,5 @@
+import re
+
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import serializers
@@ -9,6 +11,16 @@ from reviews.models import (
 
 
 class CategorySerializer(serializers.ModelSerializer):
+
+    def validate_slug(self, value):
+        if (not re.fullmatch(r"^[-a-zA-Z0-9_]+$", value)
+                or len(value) > 56):
+            raise serializers.ValidationError(
+                "Slug validation error."
+                "Slug either contains invalid chars "
+                "or it's length exceeds 56 symbols."
+            )
+        return value
 
     class Meta:
         model = Category
