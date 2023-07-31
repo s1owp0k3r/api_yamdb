@@ -4,6 +4,7 @@ from rest_framework.filters import SearchFilter
 from rest_framework.permissions import SAFE_METHODS
 from django.db.models import Avg
 
+from .permissions import IsAdminOrReadOnly
 from reviews.models import Category, Genre, Title, Review
 from .serializers import (
     CategorySerializer,
@@ -13,10 +14,6 @@ from .serializers import (
     ReviewSerializer,
     CommentSerializer
 )
-
-# Убрать эти строчки, когда будут реализована аутентификация:
-from django.contrib.auth import get_user_model
-User = get_user_model()
 
 
 class CreateListDeleteViewSet(viewsets.GenericViewSet,
@@ -34,21 +31,21 @@ class CreateListDeleteViewSet(viewsets.GenericViewSet,
 
 class CategoryViewSet(CreateListDeleteViewSet):
     """Categories viewset"""
-    # add permissions
+    permission_classes = (IsAdminOrReadOnly,)
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
 
 
 class GenreViewSet(CreateListDeleteViewSet):
     """Genre viewset"""
-    # add permissions
+    permission_classes = (IsAdminOrReadOnly,)
     serializer_class = GenreSerializer
     queryset = Genre.objects.all()
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     """Title viewset"""
-    # add permissions
+    permission_classes = (IsAdminOrReadOnly,)
     queryset = Title.objects.all().annotate(rating=Avg('reviews__score'))
     filter_backends = (
         SearchFilter,
@@ -80,8 +77,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         title_id = self.kwargs.get('title_id')
         review_title = get_object_or_404(Title, id=title_id)
-        # изменить на author=self.request.user, когда будут реализована аутентификация:
-        serializer.save(title=review_title, author=User.objects.get(id=1))
+        serializer.save(title=review_title, author=self.request.user)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -100,5 +96,4 @@ class CommentViewSet(viewsets.ModelViewSet):
         review_id = self.kwargs.get('review_id')
         title_id = self.kwargs.get('title_id')
         comment_review = get_object_or_404(Review, id=review_id, title_id=title_id)
-        # изменить на author=self.request.user, когда будут реализована аутентификация:
-        serializer.save(review=comment_review, author=User.objects.get(id=1))
+        serializer.save(review=comment_review, author=self.request.user)
