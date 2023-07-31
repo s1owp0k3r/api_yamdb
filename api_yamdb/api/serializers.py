@@ -1,27 +1,17 @@
-import re
-
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
+from .utils import validate_slug
 from reviews.models import (
     Category, Genre, Title, Comment, Review
 )
-from api_yamdb.settings import SLUG_FIELD_LENGTH
 
 
 class CategorySerializer(serializers.ModelSerializer):
 
-    def validate_slug(self, value):
-        if (not re.fullmatch(r"^[-a-zA-Z0-9_]+$", value)
-                or len(value) > SLUG_FIELD_LENGTH):
-            raise serializers.ValidationError(
-                "Slug validation error."
-                "Slug either contains invalid chars "
-                "or it's length exceeds 50 symbols."
-            )
-        return value
+    slug = serializers.SlugField(validators=[validate_slug])
 
     class Meta:
         model = Category
@@ -29,6 +19,8 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class GenreSerializer(serializers.ModelSerializer):
+
+    slug = serializers.SlugField(validators=[validate_slug])
 
     class Meta:
         model = Genre
