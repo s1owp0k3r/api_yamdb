@@ -13,6 +13,7 @@ from api_yamdb.settings import SLUG_FIELD_LENGTH
 
 
 class CategorySerializer(serializers.ModelSerializer):
+
     slug = serializers.SlugField(validators=[validate_slug])
 
     class Meta:
