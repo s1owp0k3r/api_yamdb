@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 
 from reviews.models import (
     Category, Genre, Title, Comment, Review
@@ -66,6 +67,14 @@ class TitleCRUDSerializer(TitleSerializer):
         queryset=Category.objects.all()
     )
     description = serializers.CharField(required=False)
+
+    class Meta:
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Title.objects.all(),
+                fields=["name", "year"]
+            )
+        ]
 
 
 class ReviewSerializer(serializers.ModelSerializer):
