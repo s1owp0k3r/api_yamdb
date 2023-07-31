@@ -19,7 +19,7 @@ class CategorySerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "Slug validation error."
                 "Slug either contains invalid chars "
-                "or it's length exceeds 56 symbols."
+                "or it's length exceeds 50 symbols."
             )
         return value
 
