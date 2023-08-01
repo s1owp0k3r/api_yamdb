@@ -29,9 +29,10 @@ class UserViewSet(viewsets.ModelViewSet):
     search_fields = ("username",)
 
     @action(
-        detail=False,
+        detail=True,
         methods=["get", "patch"],
         permission_classes=[IsAuthenticated],
+        url_path='me'
     )
     def profile(self, request):
         if request.method == "PATCH":
