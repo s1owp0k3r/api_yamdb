@@ -4,7 +4,7 @@ from rest_framework.filters import SearchFilter
 from rest_framework.permissions import SAFE_METHODS
 from django.db.models import Avg
 
-from .permissions import IsAdminOrReadOnly
+from .permissions import IsAdminOrReadOnly, IsAdminModeratorAuthorOrReadOnly
 from reviews.models import Category, Genre, Title, Review
 from .serializers import (
     CategorySerializer,
@@ -62,7 +62,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     """Review viewset"""
 
     serializer_class = ReviewSerializer
-    permission_classes = [] # нужно добавить пермишн
+    permission_classes = (IsAdminModeratorAuthorOrReadOnly,)
 
     def get_queryset(self):
         title_id = self.kwargs.get('title_id')
@@ -84,7 +84,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     """Comment viewset"""
 
     serializer_class = CommentSerializer
-    permission_classes = [] # нужно добавить пермишн
+    ppermission_classes = (IsAdminModeratorAuthorOrReadOnly,)
 
     def get_queryset(self):
         review_id = self.kwargs.get('review_id')
