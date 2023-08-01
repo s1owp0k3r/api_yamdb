@@ -16,8 +16,8 @@ class IsAdminOrReadOnly(permissions.BasePermission):
         return False
 
 
-class IsModeratorOrAuthorOrReadOnly(permissions.BasePermission):
-    """Permission for author and moderator."""
+class IsAdminModeratorAuthorOrReadOnly(permissions.BasePermission):
+    """"Permission for the administrator, moderator, author"""
     def has_permission(self, request, view):
         return (
             request.method in permissions.SAFE_METHODS

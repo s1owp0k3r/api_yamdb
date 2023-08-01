@@ -46,3 +46,13 @@ class UserSerializer(serializers.ModelSerializer):
     def validate_username(self, value):
         check_username(value, r'^[\w.@+-]+$')
         return value
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    """Generic serializer for profile."""
+    class Meta:
+        model = User
+        fields = (
+            "username", "email", "first_name", "last_name", "bio", "role"
+        )
+        read_only_fields = ("role",)

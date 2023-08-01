@@ -1,7 +1,8 @@
 from rest_framework import viewsets, views, response, status
 from rest_framework.filters import SearchFilter
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.decorators import action
 
 from django.core import exceptions
 from django.core.mail.message import EmailMessage
@@ -9,7 +10,12 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.tokens import default_token_generator
 
 from users.models import User
-from .serializers import UserSerializer, TokenSerializer, SignUpSerializer
+from .serializers import (
+    UserSerializer,
+    TokenSerializer,
+    SignUpSerializer,
+    ProfileSerializer
+)
 from .permissions import IsAdmin
 
 NOT_PUT_REQUESTS = [
@@ -25,6 +31,27 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdmin,)
     filter_backends = (SearchFilter,)
     search_fields = ("username",)
+
+    @action(
+        detail=True,
+        methods=["get", "patch"],
+        permission_classes=[IsAuthenticated],
+        url_path='me'
+    )
+    def profile(self, request):
+        if request.method == "PATCH":
+            serializer = ProfileSerializer(
+                self.request.user,
+                data=request.data,
+                partial=True
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return response.Response(
+                serializer.data, status=status.HTTP_200_OK
+            )
+        serializer = ProfileSerializer(self.request.user)
+        return response.Response(serializer.data)
 
 
 class SignUpViewSet(views.APIView):

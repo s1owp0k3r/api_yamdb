@@ -5,7 +5,7 @@ from rest_framework import viewsets, mixins
 from rest_framework.filters import SearchFilter
 from django.db.models import Avg
 
-from .permissions import IsAdminOrReadOnly, IsModeratorOrAuthorOrReadOnly
+from .permissions import IsAdminOrReadOnly, IsAdminModeratorAuthorOrReadOnly
 from reviews.models import Category, Genre, Title, Review
 from .serializers import (
     CategorySerializer,
@@ -22,7 +22,6 @@ class CreateListDeleteViewSet(viewsets.GenericViewSet,
                               mixins.CreateModelMixin,
                               mixins.DestroyModelMixin):
     """Generic class for list, create, delete actions"""
-
     filter_backends = (
         SearchFilter,
     )
@@ -70,9 +69,8 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """Review viewset"""
-
     serializer_class = ReviewSerializer
-    permission_classes = (IsModeratorOrAuthorOrReadOnly,)
+    permission_classes = (IsAdminModeratorAuthorOrReadOnly,)
 
     def get_queryset(self):
         title_id = self.kwargs.get('title_id')
@@ -92,9 +90,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     """Comment viewset"""
-
     serializer_class = CommentSerializer
-    permission_classes = (IsModeratorOrAuthorOrReadOnly,)
+    ppermission_classes = (IsAdminModeratorAuthorOrReadOnly,)
 
     def get_queryset(self):
         review_id = self.kwargs.get('review_id')

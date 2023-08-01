@@ -1,13 +1,20 @@
+import re
+
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 
+from .utils import validate_slug
 from reviews.models import (
     Category, Genre, Title, Comment, Review
 )
+from api_yamdb.settings import SLUG_FIELD_LENGTH
 
 
 class CategorySerializer(serializers.ModelSerializer):
+
+    slug = serializers.SlugField(validators=[validate_slug])
 
     class Meta:
         model = Category
@@ -15,6 +22,8 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class GenreSerializer(serializers.ModelSerializer):
+
+    slug = serializers.SlugField(validators=[validate_slug])
 
     class Meta:
         model = Genre
@@ -66,6 +75,14 @@ class TitleCRUDSerializer(TitleSerializer):
         queryset=Category.objects.all()
     )
     description = serializers.CharField(required=False)
+
+    class Meta:
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Title.objects.all(),
+                fields=["name", "year"]
+            )
+        ]
 
 
 class ReviewSerializer(serializers.ModelSerializer):
