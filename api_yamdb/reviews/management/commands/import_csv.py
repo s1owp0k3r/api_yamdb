@@ -62,6 +62,6 @@ class Command(BaseCommand):
                             f'Error: - {error}'
                         )
             self.stdout.write(
-                    f'Finished importing data for model {model.__name__}\n'
-                    f'Total rows: {rows}. Imported successfully: {successful}.'
+                f'Finished importing data for model {model.__name__}\n'
+                f'Total rows: {rows}. Imported successfully: {successful}.'
             )
