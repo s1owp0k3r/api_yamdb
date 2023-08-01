@@ -3,13 +3,23 @@ from rest_framework import serializers
 
 from users.models import User
 
-def check_username(username, regex):
-    if not fullmatch(regex, username):
-        raise serializers.ValidationError('Username does not meet the requirements.')
+
+class UsernameValidationSerializer(serializers.ModelSerializer):
+    def validate_username(self, value):
+        """"Username validation"""
+        if not fullmatch(r'^[\w.@+-]+$', value):
+            raise serializers.ValidationError(
+                'Username does not meet the requirements.'
+            )
+        if value == 'me':
+            raise serializers.ValidationError(
+                "Using 'me' as username is not allowed."
+            )
+        return value
 
 
 class TokenSerializer(serializers.ModelSerializer):
-    """Generic serializer for token."""
+    """Token getting serializer"""
     username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(required=True)
 
@@ -20,36 +30,26 @@ class TokenSerializer(serializers.ModelSerializer):
         )
 
 
-class SignUpSerializer(serializers.ModelSerializer):
-    """Generic serializer for registration."""
+class SignUpSerializer(UsernameValidationSerializer):
+    """Serializer for registration."""
     class Meta:
         model = User
         fields = (
             "username", "email",
         )
 
-    def validate_username(self, value):
-        check_username(value, r'^[\w.@+-]+$')
-        if value == 'me':
-            raise serializers.ValidationError("Using 'me' as username is not allowed.")
-        return value
 
-
-class UserSerializer(serializers.ModelSerializer):
-    """Generic serializer for user."""
+class UserSerializer(UsernameValidationSerializer):
+    """Serializer for user model"""
     class Meta:
         model = User
         fields = (
             "username", "email", "first_name", "last_name", "bio", "role"
         )
 
-    def validate_username(self, value):
-        check_username(value, r'^[\w.@+-]+$')
-        return value
 
-
-class ProfileSerializer(serializers.ModelSerializer):
-    """Generic serializer for profile."""
+class ProfileSerializer(UsernameValidationSerializer):
+    """Serializer for user profile"""
     class Meta:
         model = User
         fields = (

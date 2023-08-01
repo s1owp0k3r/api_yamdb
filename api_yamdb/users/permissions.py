@@ -4,7 +4,7 @@ from .models import Role
 
 
 class IsAdmin(permissions.BasePermission):
-    """"Permission for the administrator."""
+    """"Permission for the administrator"""
     def has_permission(self, request, view):
         if request.user.is_authenticated:
             return (

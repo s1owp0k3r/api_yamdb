@@ -1,29 +1,34 @@
-import re
-
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from re import fullmatch
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from .utils import validate_slug
-from reviews.models import (
-    Category, Genre, Title, Comment, Review
-)
 from api_yamdb.settings import SLUG_FIELD_LENGTH
+from reviews.models import Category, Comment, Genre, Review, Title
 
 
-class CategorySerializer(serializers.ModelSerializer):
+class SlugValidationSerializer(serializers.ModelSerializer):
+    def validate_slug(self, data):
+        """Slug field validation"""
+        if (not fullmatch(r"^[-a-zA-Z0-9_]+$", data)
+                or len(data) > SLUG_FIELD_LENGTH):
+            raise serializers.ValidationError(
+                "Slug validation error."
+                "Slug either contains invalid chars "
+                "or it's length exceeds 50 symbols."
+            )
+        return data
 
-    slug = serializers.SlugField(validators=[validate_slug])
+
+class CategorySerializer(SlugValidationSerializer):
 
     class Meta:
         model = Category
         fields = ('name', 'slug',)
 
 
-class GenreSerializer(serializers.ModelSerializer):
-
-    slug = serializers.SlugField(validators=[validate_slug])
+class GenreSerializer(SlugValidationSerializer):
 
     class Meta:
         model = Genre
@@ -76,7 +81,7 @@ class TitleCRUDSerializer(TitleSerializer):
     )
     description = serializers.CharField(required=False)
 
-    class Meta:
+    class Meta(TitleSerializer.Meta):
         validators = [
             UniqueTogetherValidator(
                 queryset=Title.objects.all(),
@@ -97,7 +102,6 @@ class ReviewSerializer(serializers.ModelSerializer):
         default=0
     )
 
-
     class Meta:
         model = Review
         fields = ('id', 'text', 'author', 'title', 'score', 'pub_date')
@@ -107,7 +111,9 @@ class ReviewSerializer(serializers.ModelSerializer):
         """Reviews of current user count checking."""
         title = get_object_or_404(Title, id=self.context['title_id'])
         if (
-            Review.objects.filter(title=title, author=self.context['request'].user).exists()
+            Review.objects.filter(
+                title=title, author=self.context['request'].user
+            ).exists()
             and self.context['request'].method == 'POST'
         ):
             raise serializers.ValidationError(
