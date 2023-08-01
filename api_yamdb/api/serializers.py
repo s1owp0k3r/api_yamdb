@@ -1,5 +1,3 @@
-import re
-
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import serializers
@@ -9,7 +7,6 @@ from .utils import validate_slug
 from reviews.models import (
     Category, Genre, Title, Comment, Review
 )
-from api_yamdb.settings import SLUG_FIELD_LENGTH
 
 
 class CategorySerializer(serializers.ModelSerializer):
