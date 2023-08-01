@@ -1,35 +1,39 @@
-from rest_framework import viewsets, views, response, status
-from rest_framework.filters import SearchFilter
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.decorators import action
-
+from django.contrib.auth.tokens import default_token_generator
 from django.core import exceptions
 from django.core.mail.message import EmailMessage
 from django.shortcuts import get_object_or_404
-from django.contrib.auth.tokens import default_token_generator
+from rest_framework import response, status, views, viewsets
+from rest_framework.decorators import action
+from rest_framework.filters import SearchFilter
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from users.models import User
-from .serializers import (
-    UserSerializer,
-    TokenSerializer,
-    SignUpSerializer,
-    ProfileSerializer
-)
 from .permissions import IsAdmin
+from .serializers import (
+    ProfileSerializer,
+    SignUpSerializer,
+    TokenSerializer,
+    UserSerializer
+)
+
+NOT_PUT_REQUESTS = [
+    'get', 'post', 'patch', 'delete'
+]
 
 
 class UserViewSet(viewsets.ModelViewSet):
     """User viewset."""
-    queryset = User.objects.all()
+    queryset = User.objects.all().order_by('id')
     serializer_class = UserSerializer
+    http_method_names = NOT_PUT_REQUESTS
     lookup_field = "username"
     permission_classes = (IsAdmin,)
     filter_backends = (SearchFilter,)
     search_fields = ("username",)
 
     @action(
-        detail=True,
+        detail=False,
         methods=["get", "patch"],
         permission_classes=[IsAuthenticated],
         url_path='me'
@@ -57,8 +61,8 @@ class SignUpViewSet(views.APIView):
     def post(self, request):
         try:
             user = User.objects.get(
-                username=request.data["username"],
-                email=request.data["email"]
+                username=request.data.get('username'),
+                email=request.data.get('email')
             )
         except exceptions.ObjectDoesNotExist:
             serializer = SignUpSerializer(data=request.data)
