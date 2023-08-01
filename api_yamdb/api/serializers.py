@@ -11,14 +11,14 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = "__all__"
+        fields = ('name', 'slug',)
 
 
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Genre
-        fields = "__all__"
+        fields = ('name', 'slug',)
 
 
 class TitleSerializer(serializers.ModelSerializer):
@@ -89,10 +89,8 @@ class ReviewSerializer(serializers.ModelSerializer):
     def validate(self, data):
         """Reviews of current user count checking."""
         title = get_object_or_404(Title, id=self.context['title_id'])
-        # добавить в filter условие author=self.context['request'].user
-        # после реализации модели юзера
         if (
-            Review.objects.filter(title=title).exists()
+            Review.objects.filter(title=title, author=self.context['request'].user).exists()
             and self.context['request'].method == 'POST'
         ):
             raise serializers.ValidationError(

@@ -12,11 +12,15 @@ from users.models import User
 from .serializers import UserSerializer, TokenSerializer, SignUpSerializer
 from .permissions import IsAdmin
 
+NOT_PUT_REQUESTS = [
+    'get', 'post', 'patch', 'delete'
+]
 
 class UserViewSet(viewsets.ModelViewSet):
     """User viewset."""
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    http_method_names = NOT_PUT_REQUESTS
     lookup_field = "username"
     permission_classes = (IsAdmin,)
     filter_backends = (SearchFilter,)
@@ -30,8 +34,8 @@ class SignUpViewSet(views.APIView):
     def post(self, request):
         try:
             user = User.objects.get(
-                username=request.data["username"],
-                email=request.data["email"]
+                username=request.data.get('username'),
+                email=request.data.get('email')
             )
         except exceptions.ObjectDoesNotExist:
             serializer = SignUpSerializer(data=request.data)

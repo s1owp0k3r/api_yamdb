@@ -49,7 +49,7 @@ class Title(models.Model):
     category = models.ForeignKey(
         Category,
         on_delete=models.DO_NOTHING,
-        related_name="category"
+        related_name="titles"
     )
 
     class Meta:

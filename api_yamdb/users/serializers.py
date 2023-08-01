@@ -1,6 +1,11 @@
+from re import fullmatch
 from rest_framework import serializers
 
 from users.models import User
+
+def check_username(username, regex):
+    if not fullmatch(regex, username):
+        raise serializers.ValidationError('Username does not meet the requirements.')
 
 
 class TokenSerializer(serializers.ModelSerializer):
@@ -23,6 +28,12 @@ class SignUpSerializer(serializers.ModelSerializer):
             "username", "email",
         )
 
+    def validate_username(self, value):
+        check_username(value, r'^[\w.@+-]+$')
+        if value == 'me':
+            raise serializers.ValidationError("Using 'me' as username is not allowed.")
+        return value
+
 
 class UserSerializer(serializers.ModelSerializer):
     """Generic serializer for user."""
@@ -31,3 +42,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = (
             "username", "email", "first_name", "last_name", "bio", "role"
         )
+
+    def validate_username(self, value):
+        check_username(value, r'^[\w.@+-]+$')
+        return value
