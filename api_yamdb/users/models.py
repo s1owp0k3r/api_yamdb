@@ -42,7 +42,10 @@ class User(AbstractUser):
         return self.username
 
     def is_admin(self):
-        return self.role == Role.ADMIN
+        return self.role == Role.ADMIN or self.is_superuser
 
     def is_moderator(self):
-        return self.role == Role.MODERATOR
+        return (
+            self.role in (Role.MODERATOR, Role.ADMIN)
+            or self.is_superuser
+        )
